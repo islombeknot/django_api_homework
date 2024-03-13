@@ -1,3 +1,4 @@
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import random
@@ -91,5 +92,29 @@ def check_username(self):
           self.check_hash_password()
 
 
-          super(User,self).save(*args, **kwargs)    
+          super(User,self).save(*args, **kwargs)
+class UserCodeVarivication(BaseModel):
+     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_code_varivication')
+     def create_confirmation_code(self,auth_type):
+          code = "".join([str(random.randint(0, 9)) for _ in range(4)])
+
+          UserCodeVarivication.objects.create(
+               code=code,
+               auth_type=auth_type,
+               user_id=self.id
+
+          )
+          return code
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+     
+    
+
 
